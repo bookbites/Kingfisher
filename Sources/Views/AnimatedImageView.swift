@@ -292,12 +292,16 @@ open class AnimatedImageView: UIImageView {
         // See [#718](https://github.com/onevcat/Kingfisher/issues/718)
         // By setting CADisableMinimumFrameDuration to YES in Info.plist may
         // cause the preferredFramesPerSecond being 0
-        let preferredFramesPerSecond = displayLink.preferredFramesPerSecond
-        if preferredFramesPerSecond == 0 {
-            duration = displayLink.duration
+        if #available(iOS 10, *) {
+            let preferredFramesPerSecond = displayLink.preferredFramesPerSecond
+            if preferredFramesPerSecond == 0 {
+                duration = displayLink.duration
+            } else {
+                // Some devices (like iPad Pro 10.5) will have a different FPS.
+                duration = 1.0 / TimeInterval(preferredFramesPerSecond)
+            }
         } else {
-            // Some devices (like iPad Pro 10.5) will have a different FPS.
-            duration = 1.0 / TimeInterval(preferredFramesPerSecond)
+            duration = displayLink.duration
         }
 
         animator.shouldChangeFrame(with: duration) { [weak self] hasNewFrame in
